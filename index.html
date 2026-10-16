@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The Aurelia Stays | Review helper</title>
+<style>
+:root{--ink:#252525;--muted:#666;--line:#dedede;--accent:#73523d;--soft:#f7f4f1}
+*{box-sizing:border-box}body{position:relative;isolation:isolate;min-height:100vh;margin:0;background:transparent;font-family:Arial,Helvetica,sans-serif;color:var(--ink);padding:18px}
+body::before{content:'';position:fixed;inset:-12px;z-index:-2;background:url('room-background.jpg') center 52%/cover no-repeat;filter:blur(8px);transform:scale(1.03)}body::after{content:'';position:fixed;inset:0;z-index:-1;background:rgba(255,255,255,.52);pointer-events:none}main{max-width:560px;margin:0 auto;background:rgba(255,255,255,.94);border:1px solid #ded8d1;border-radius:22px;padding:22px;box-shadow:0 12px 40px #38291b20;backdrop-filter:blur(3px)}
+header{text-align:center;padding:4px 0 18px}.brand-logo{display:block;width:min(180px,55%);height:auto;max-height:165px;object-fit:contain;margin:0 auto 8px}.eyebrow{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--accent)}
+h1{font-family:Georgia,serif;font-weight:normal;font-size:30px;margin:8px 0}p{line-height:1.5;color:var(--muted)}
+label{display:block;font-size:14px;font-weight:700;margin:17px 0 7px}
+select,textarea{width:100%;font:inherit;border:1px solid #cfcfcf;border-radius:10px;padding:12px;background:#fff;color:var(--ink)}
+textarea{min-height:230px;resize:vertical;line-height:1.55}
+.actions{display:flex;gap:10px;margin-top:12px}.actions button{flex:1}
+button{font:inherit;font-weight:700;border-radius:10px;padding:12px 14px;border:1px solid var(--accent);cursor:pointer}
+.primary{background:var(--accent);color:#fff}.secondary{background:#fff;color:var(--accent)}
+.note{font-size:12px;background:var(--soft);padding:12px;border-radius:10px;margin-top:16px;line-height:1.5}
+.status{font-size:13px;min-height:18px;color:#356b43;margin-top:8px}
+@media(max-width:430px){body{padding:10px}main{padding:18px}.actions{flex-direction:column}}
+</style></head>
+<body><main>
+<header><img class="brand-logo" src="aurelia-logo.jpg" alt="The Aurelia Stays logo"><div class="eyebrow">A thoughtful stay begins with your feedback</div><h1>The Aurelia Stays</h1><p>Share your stay in the language you prefer.</p></header>
+<label for="language">Choose language / भाषा चुनें</label>
+<select id="language">
+<option value="en">English</option><option value="hi">हिन्दी — Hindi</option><option value="gu">ગુજરાતી — Gujarati</option><option value="bn">বাংলা — Bengali</option><option value="mr">मराठी — Marathi</option><option value="ta">தமிழ் — Tamil</option><option value="te">తెలుగు — Telugu</option><option value="kn">ಕನ್ನಡ — Kannada</option><option value="ml">മലയാളം — Malayalam</option><option value="pa">ਪੰਜਾਬੀ — Punjabi</option>
+</select>
+<label for="review">Review draft</label><textarea id="review" spellcheck="true"></textarea>
+<div class="actions"><button class="secondary" id="dice">🎲 Roll dice · New review</button><button class="secondary" id="copy">Copy review</button></div>
+<div class="actions"><button class="primary" id="maps">Copy review & open Google Maps ↗</button></div>
+<div id="status" class="status" role="status"></div>
+<div class="note">Emoji are optional expressive touches, not proof that a review is genuine. Keep only statements that match your own stay. This helper opens Google Maps after copying your draft. Google controls its review form, so paste the text there, choose the rating that reflects your stay, and submit it yourself.</div>
+</main>
+<script>
+const mapsUrl = "https://www.google.com/travel/search?q=The%20Aurelia%20Stays%20Varanasi&g2lb=4965990%2C72471280%2C72573224%2C72647020%2C72686036%2C72803964%2C72882230%2C73064764%2C121529350%2C121608706%2C121738283%2C121921501%2C121951222%2C122078727%2C122093076%2C122097177&hl=en-IN&gl=in&ssta=1&ts=CAEaRwopEicyJTB4Mzk4ZTJkMjgzMDdmODIyZjoweDNkNWVhMWM3MmQ4ZTAyODYSGhIUCgcI6w8QCBgHEgcI6w8QCBgIGAEyAhAA&qs=CAEyE0Nnb0lob1c0N1BLNHFLODlFQUU4AkIJCYYCji3HoV49QgkJhgKOLcehXj0&ap=KigKEglXq9S9wVA5QBGhyH94E79UQBISCf6gC2QrUjlAEaHIf5tZv1RAugEHcmV2aWV3cw&ictx=111&ved=0CAAQ5JsGahcKEwiY__P4_L2XAxUAAAAAHQAAAAAQAw";
+const lang=document.getElementById("language"), review=document.getElementById("review"), status=document.getElementById("status");let last=-1;
+const drafts={
+en:[
+"🌿 I had a pleasant overall stay at The Aurelia Stays. I appreciated having a place to stay while visiting the area, and I’m glad to share my feedback. Every traveller has different needs, so I’d recommend checking the property details to see if they suit your plans. Thank you for hosting me! 😊",
+"✨ Sharing my experience at The Aurelia Stays. Overall, I’m happy to have stayed here during my visit. I appreciate the hospitality and the chance to leave feedback. What matters most can differ from guest to guest, so make your choice based on your own travel needs. 🙏",
+"🏡 My overall experience at The Aurelia Stays was positive. It was a place to stay during my time in the area, and I’m pleased to share a few words about my visit. Thank you to the team for hosting guests. 🌼",
+"😊 I’m glad to share feedback about my stay at The Aurelia Stays. My overall impression was positive, and I appreciated having accommodation for my trip. I hope this feedback is useful to other travellers as they compare options. 🌿",
+"🌸 Thank you, The Aurelia Stays, for hosting my visit. I had a good overall experience and appreciate the opportunity to share my thoughts. Each guest’s experience is personal, so please choose accommodation that fits your own preferences and plans. ✨"
+],
+hi:[
+"🌿 The Aurelia Stays में मेरा कुल अनुभव अच्छा रहा। यात्रा के दौरान यहाँ ठहरना मेरे लिए अच्छा रहा और मुझे अपना अनुभव साझा करके खुशी हुई। हर यात्री की ज़रूरतें अलग होती हैं, इसलिए बुकिंग से पहले उपलब्ध सुविधाओं की जानकारी अपनी ज़रूरत के अनुसार देख लें। मेज़बानी के लिए धन्यवाद। 😊",
+"✨ The Aurelia Stays में ठहरने के बाद मैं अपना अनुभव साझा करना चाहता/चाहती हूँ। मेरा कुल अनुभव सकारात्मक रहा और यहाँ रुकने का अवसर अच्छा लगा। दूसरे यात्रियों की प्राथमिकताएँ अलग हो सकती हैं, इसलिए अपनी यात्रा के अनुसार जगह चुनें। धन्यवाद। 🙏",
+"🏡 The Aurelia Stays में मेरा समग्र अनुभव अच्छा रहा। यात्रा के दौरान यहाँ ठहरने का अनुभव साझा करके खुशी हुई। अपनी यात्रा की योजना बनाते समय सुविधाओं की जानकारी अपनी ज़रूरतों के अनुसार देखना उपयोगी रहेगा। 🌼"
+],
+gu:[
+"🌿 The Aurelia Stays માં મારો એકંદર અનુભવ સારો રહ્યો. મુસાફરી દરમિયાન અહીં રોકાવાનો અનુભવ શેર કરતાં આનંદ થાય છે. દરેક પ્રવાસીની જરૂરિયાત અલગ હોય છે, તેથી બુકિંગ પહેલાં પોતાની જરૂરિયાત મુજબ ઉપલબ્ધ સુવિધાઓ તપાસો. મહેમાનગતિ બદલ આભાર. 😊",
+"✨ The Aurelia Stays માં રોકાણ અંગે મારો એકંદર પ્રતિભાવ સકારાત્મક રહ્યો. અહીં રોકાવા અંગેનો મારો અનુભવ શેર કરવાની તક બદલ આભાર. અન્ય પ્રવાસીઓની પસંદગી અલગ હોઈ શકે છે, તેથી પોતાની યોજના મુજબ સ્થળ પસંદ કરો. 🙏",
+"🏡 The Aurelia Stays માં મારો કુલ અનુભવ સારો રહ્યો. મારી મુસાફરી દરમિયાન અહીં રોકાવા અંગેનો પ્રતિભાવ શેર કરતાં આનંદ થાય છે. બુકિંગ પહેલાં પોતાની જરૂરિયાતો મુજબ સુવિધાઓ તપાસવી ઉપયોગી રહેશે. 🌼"
+],
+bn:[
+"🌿 The Aurelia Stays-এ আমার সামগ্রিক অভিজ্ঞতা ভালো ছিল। ভ্রমণের সময় এখানে থাকার অভিজ্ঞতা ভাগ করে নিতে পেরে ভালো লাগছে। প্রত্যেক ভ্রমণকারীর প্রয়োজন আলাদা, তাই বুকিংয়ের আগে নিজের প্রয়োজন অনুযায়ী সুবিধাগুলি দেখে নিন। আতিথেয়তার জন্য ধন্যবাদ। 😊",
+"✨ The Aurelia Stays-এ থাকা নিয়ে আমার সামগ্রিক অভিজ্ঞতা ইতিবাচক ছিল। নিজের অভিজ্ঞতা জানানোর সুযোগ পেয়ে ভালো লাগছে। অন্য অতিথিদের পছন্দ আলাদা হতে পারে, তাই নিজের ভ্রমণ পরিকল্পনা অনুযায়ী থাকার জায়গা বেছে নিন। 🙏",
+"🏡 The Aurelia Stays-এ আমার অভিজ্ঞতা মোটের ওপর ভালো ছিল। ভ্রমণের সময় এখানে থাকার বিষয়ে মতামত জানাতে পেরে ভালো লাগছে। বুকিংয়ের আগে নিজের প্রয়োজন অনুযায়ী সুবিধাগুলি দেখে নেওয়া ভালো। 🌼"
+],
+mr:[
+"🌿 The Aurelia Stays मधील माझा एकूण अनुभव चांगला होता. प्रवासादरम्यान येथे राहण्याचा अनुभव शेअर करताना आनंद होत आहे. प्रत्येक प्रवाशाच्या गरजा वेगळ्या असतात, त्यामुळे बुकिंगपूर्वी आपल्या गरजांनुसार उपलब्ध सुविधा तपासा. आदरातिथ्याबद्दल धन्यवाद. 😊",
+"✨ The Aurelia Stays येथे राहण्याबद्दल माझा एकंदरीत अनुभव सकारात्मक होता. माझा अनुभव शेअर करण्याची संधी मिळाल्याचा आनंद आहे. इतर प्रवाशांच्या अपेक्षा वेगळ्या असू शकतात, त्यामुळे आपल्या प्रवासानुसार निवड करा. 🙏",
+"🏡 The Aurelia Stays मधील माझा एकूण अनुभव चांगला होता. येथे मुक्कामाबद्दल अभिप्राय देताना आनंद होत आहे. बुकिंग करण्यापूर्वी आपल्या गरजांनुसार सुविधा तपासणे उपयोगी ठरेल. 🌼"
+],
+ta:[
+"🌿 The Aurelia Stays-இல் எனது மொத்த அனுபவம் நன்றாக இருந்தது. எனது பயணத்தின் போது இங்கு தங்கிய அனுபவத்தைப் பகிர்வதில் மகிழ்ச்சி. ஒவ்வொரு பயணியின் தேவையும் மாறுபடும்; எனவே முன்பதிவு செய்வதற்கு முன் உங்களுக்குத் தேவையான வசதிகளைச் சரிபார்க்கவும். நன்றி. 😊",
+"✨ The Aurelia Stays-இல் தங்கிய அனுபவம் ஒட்டுமொத்தமாக நேர்மறையாக இருந்தது. எனது கருத்தைப் பகிர வாய்ப்பு கிடைத்ததில் மகிழ்ச்சி. மற்ற பயணிகளின் விருப்பங்கள் மாறுபடலாம்; உங்கள் தேவைகளுக்கு ஏற்பத் தேர்வு செய்யுங்கள். 🙏",
+"🏡 The Aurelia Stays-இல் எனது அனுபவம் நன்றாக இருந்தது. இங்கு தங்கிய அனுபவத்தைப் பகிர்வதில் மகிழ்ச்சி. முன்பதிவுக்கு முன் உங்களுக்குத் தேவையான வசதிகள் உள்ளனவா என்பதைப் பாருங்கள். 🌼"
+],
+te:[
+"🌿 The Aurelia Stays లో నా మొత్తం అనుభవం బాగుంది. నా ప్రయాణ సమయంలో ఇక్కడ బస చేసిన అనుభవాన్ని పంచుకోవడం సంతోషంగా ఉంది. ప్రతి ప్రయాణికుడి అవసరాలు వేర్వేరుగా ఉంటాయి కాబట్టి, బుకింగ్‌కు ముందు మీకు అవసరమైన సౌకర్యాలను పరిశీలించండి. ధన్యవాదాలు. 😊",
+"✨ The Aurelia Stays లో బస చేసిన అనుభవం మొత్తంగా సానుకూలంగా ఉంది. నా అభిప్రాయాన్ని పంచుకునే అవకాశం లభించినందుకు సంతోషంగా ఉంది. ఇతర ప్రయాణికుల అవసరాలు భిన్నంగా ఉండవచ్చు, కాబట్టి మీ అవసరాలకు తగిన ఎంపిక చేసుకోండి. 🙏"
+],
+kn:[
+"🌿 The Aurelia Stays ನಲ್ಲಿ ನನ್ನ ಒಟ್ಟಾರೆ ಅನುಭವ ಚೆನ್ನಾಗಿತ್ತು. ನನ್ನ ಪ್ರಯಾಣದ ಸಮಯದಲ್ಲಿ ಇಲ್ಲಿ ತಂಗಿದ ಅನುಭವವನ್ನು ಹಂಚಿಕೊಳ್ಳಲು ಸಂತೋಷವಾಗಿದೆ. ಪ್ರತಿಯೊಬ್ಬ ಪ್ರಯಾಣಿಕರ ಅಗತ್ಯಗಳು ವಿಭಿನ್ನವಾಗಿರುತ್ತವೆ; ಆದ್ದರಿಂದ ಬುಕ್ಕಿಂಗ್ ಮಾಡುವ ಮೊದಲು ನಿಮಗೆ ಬೇಕಾದ ಸೌಲಭ್ಯಗಳನ್ನು ಪರಿಶೀಲಿಸಿ. ಧನ್ಯವಾದಗಳು. 😊",
+"✨ The Aurelia Stays ನಲ್ಲಿ ತಂಗಿದ ಅನುಭವ ಒಟ್ಟಾರೆ ಸಕಾರಾತ್ಮಕವಾಗಿತ್ತು. ನನ್ನ ಅಭಿಪ್ರಾಯ ಹಂಚಿಕೊಳ್ಳಲು ಅವಕಾಶ ಸಿಕ್ಕಿದ್ದು ಸಂತೋಷ. ಇತರ ಪ್ರಯಾಣಿಕರ ಅಗತ್ಯಗಳು ಬೇರೆ ಇರಬಹುದು, ಆದ್ದರಿಂದ ನಿಮ್ಮ ಅಗತ್ಯಕ್ಕೆ ತಕ್ಕಂತೆ ಆಯ್ಕೆಮಾಡಿ. 🙏"
+],
+ml:[
+"🌿 The Aurelia Stays-ലെ എന്റെ മൊത്തത്തിലുള്ള അനുഭവം നല്ലതായിരുന്നു. യാത്രയ്ക്കിടെ ഇവിടെ താമസിച്ച അനുഭവം പങ്കിടുന്നതിൽ സന്തോഷമുണ്ട്. ഓരോ യാത്രക്കാരന്റെയും ആവശ്യങ്ങൾ വ്യത്യസ്തമാണ്; അതിനാൽ ബുക്ക് ചെയ്യുന്നതിന് മുമ്പ് നിങ്ങളുടെ ആവശ്യങ്ങൾക്ക് അനുയോജ്യമായ സൗകര്യങ്ങൾ പരിശോധിക്കുക. നന്ദി. 😊",
+"✨ The Aurelia Stays-ലെ താമസാനുഭവം മൊത്തത്തിൽ അനുകൂലമായിരുന്നു. എന്റെ അഭിപ്രായം പങ്കിടാൻ അവസരം ലഭിച്ചതിൽ സന്തോഷമുണ്ട്. മറ്റുള്ളവരുടെ ആവശ്യങ്ങൾ വ്യത്യസ്തമായിരിക്കാം, അതിനാൽ നിങ്ങളുടെ ആവശ്യങ്ങൾക്കനുസരിച്ച് തിരഞ്ഞെടുക്കുക. 🙏"
+],
+pa:[
+"🌿 The Aurelia Stays ਵਿੱਚ ਮੇਰਾ ਕੁੱਲ ਤਜਰਬਾ ਚੰਗਾ ਰਿਹਾ। ਆਪਣੀ ਯਾਤਰਾ ਦੌਰਾਨ ਇੱਥੇ ਰਹਿਣ ਦਾ ਤਜਰਬਾ ਸਾਂਝਾ ਕਰਕੇ ਖੁਸ਼ੀ ਹੋ ਰਹੀ ਹੈ। ਹਰ ਯਾਤਰੀ ਦੀਆਂ ਲੋੜਾਂ ਵੱਖਰੀਆਂ ਹੁੰਦੀਆਂ ਹਨ, ਇਸ ਲਈ ਬੁਕਿੰਗ ਤੋਂ ਪਹਿਲਾਂ ਆਪਣੀਆਂ ਲੋੜਾਂ ਮੁਤਾਬਕ ਸਹੂਲਤਾਂ ਦੀ ਜਾਂਚ ਕਰੋ। ਧੰਨਵਾਦ। 😊",
+"✨ The Aurelia Stays ਵਿੱਚ ਰਹਿਣ ਦਾ ਮੇਰਾ ਤਜਰਬਾ ਕੁੱਲ ਮਿਲਾ ਕੇ ਸਕਾਰਾਤਮਕ ਰਿਹਾ। ਆਪਣੀ ਰਾਏ ਸਾਂਝੀ ਕਰਨ ਦਾ ਮੌਕਾ ਮਿਲਣ 'ਤੇ ਖੁਸ਼ੀ ਹੈ। ਹੋਰ ਯਾਤਰੀਆਂ ਦੀਆਂ ਲੋੜਾਂ ਵੱਖਰੀਆਂ ਹੋ ਸਕਦੀਆਂ ਹਨ, ਇਸ ਲਈ ਆਪਣੀ ਯੋਜਨਾ ਅਨੁਸਾਰ ਚੋਣ ਕਰੋ। 🙏"
+]};
+function generate(){const arr=drafts[lang.value]||drafts.en;let n;do{n=Math.floor(Math.random()*arr.length)}while(arr.length>1&&n===last);last=n;review.value=arr[n];status.textContent="New review draft ready. Keep only details that accurately reflect your stay."}
+async function copyDraft(){try{await navigator.clipboard.writeText(review.value);return true}catch(e){review.focus();review.select();status.textContent="Clipboard access was blocked; copy the selected text manually.";return false}}
+document.getElementById("dice").onclick=generate;
+document.getElementById("copy").onclick=async()=>{if(await copyDraft())status.textContent="Review copied. Check it before posting."};
+document.getElementById("maps").onclick=async()=>{const ok=await copyDraft();window.open(mapsUrl,"_blank","noopener,noreferrer");if(ok)status.textContent="Copied and opened Google Maps. Paste the draft and submit it yourself."};
+lang.onchange=()=>{last=-1;generate()};generate();
+</script></body></html>
